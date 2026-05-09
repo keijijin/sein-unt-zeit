@@ -1,0 +1,10 @@
+.venv/
+web/node_modules/
+web/dist/
+*.log
+.DS_Store
+.env
+web/public/data/ja-sections.partial.json
+
+# 書籍全文 PDF は著作権のためリポジトリに含めない。手元に置いて抽出スクリプトを実行する。
+doc/*.pdf
