@@ -151,6 +151,49 @@ kbd {
   font-weight: 700;
 }
 
+.mobile-tabbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.mobile-tab {
+  flex: 1 1 auto;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mobile-tab.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(122, 46, 29, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  .mobile-tab.is-active {
+    box-shadow: inset 0 0 0 1px rgba(240, 178, 156, 0.2);
+  }
+}
+
 .grid {
   flex: 1;
   min-height: 0;
@@ -718,12 +761,145 @@ kbd {
     grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, 1fr);
   }
 
+  .grid.grid--narrow-tabs {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
   .grid--focus {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
 
+  .grid--focus.grid--narrow-tabs {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
   .toc {
     max-height: min(14rem, 35dvh);
+  }
+
+  .grid.grid--narrow-tabs .toc {
+    max-height: none;
+    min-height: 0;
+    align-self: stretch;
+    /* タブで目次のみ表示するとき、グリッド行いっぱいに伸ばす */
+    height: 100%;
+  }
+
+  /*
+   * 狭い画面＋タブ表示時: 日本語ペインは「訳」と「学習メモ」を縦に並べ、
+   * ペイン全体で1本スクロールする。flex で訳/メモを分割すると残り高さが
+   * 数行分しか取れず訳が読めなくなるため、子の flex 伸長は使わない。
+   */
+  .grid.grid--narrow-tabs .ja-pane {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .grid.grid--narrow-tabs .ja-trans-body,
+  .grid.grid--narrow-tabs .ja-body {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .grid.grid--narrow-tabs .de-text,
+  .grid.grid--narrow-tabs .ja-trans {
+    font-size: 1.02rem;
+    line-height: 1.78;
+  }
+
+  .top .sub {
+    display: none;
+  }
+}
+
+/* タブ表示時はヘッダー等を詰め、本文グリッドに縦スペースを回す（.top は .grid の兄弟のため :has を使用） */
+.app:has(.grid.grid--narrow-tabs) .top {
+  padding: 0.55rem 0.85rem 0.5rem;
+  gap: 0.5rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .brand {
+  gap: 0.55rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .logo {
+  width: 2.15rem;
+  height: 2.15rem;
+  font-size: 0.9rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) h1 {
+  font-size: 1.02rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .stats {
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .pill {
+  font-size: 0.8rem;
+  padding: 0.28rem 0.5rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ghost {
+  padding: 0.32rem 0.55rem;
+  font-size: 0.82rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .quote {
+  margin: 0.4rem 0.85rem 0;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.app:has(.grid.grid--narrow-tabs) .mobile-tabbar {
+  padding: 0.35rem 0.65rem;
+  gap: 0.3rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .mobile-tab {
+  min-height: 2.35rem;
+  font-size: 0.82rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-pane .pane-head.ja-head {
+  padding: 0.45rem 0.65rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-head h2 {
+  font-size: 0.95rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-head .de {
+  font-size: 0.72rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-trans-head,
+.app:has(.grid.grid--narrow-tabs) .ja-guide-head {
+  padding: 0.28rem 0.65rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-trans-body {
+  padding-bottom: 0.65rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-body {
+  padding-top: 0.5rem;
+}
+
+.app:has(.grid.grid--narrow-tabs) .ja-foot {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.74rem;
+}
+
+@media (max-width: 1100px) and (min-width: 701px) {
+  .top .sub {
+    display: block;
   }
 }

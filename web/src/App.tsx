@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { marked } from 'marked'
 import mermaid from 'mermaid'
 
@@ -16,6 +16,25 @@ const JA_DATA_URL = '/data/ja-sections.json'
 const OVERVIEW_BASE_URL = '/overview'
 const LS_KEY = 'suz-idx-v1'
 const LS_DONE = 'suz-done-v1'
+const NARROW_MQ = '(max-width: 1100px)'
+
+function subscribeNarrow(cb: () => void) {
+  const mq = window.matchMedia(NARROW_MQ)
+  mq.addEventListener('change', cb)
+  return () => mq.removeEventListener('change', cb)
+}
+
+function getNarrowSnapshot() {
+  return window.matchMedia(NARROW_MQ).matches
+}
+
+function getNarrowServerSnapshot() {
+  return false
+}
+
+function useNarrowReaderLayout() {
+  return useSyncExternalStore(subscribeNarrow, getNarrowSnapshot, getNarrowServerSnapshot)
+}
 
 type LangMap = Record<string, string>
 
@@ -39,12 +58,21 @@ function loadDone(): Set<number> {
   }
 }
 
+type MobileReaderTab = 'toc' | 'de' | 'ja'
+
+function initialMobileTab(): MobileReaderTab {
+  if (typeof window === 'undefined') return 'de'
+  return window.matchMedia(NARROW_MQ).matches ? 'toc' : 'de'
+}
+
 export default function App() {
   const [siteView, setSiteView] = useState<'reader' | 'completion'>('reader')
   const [idx, setIdx] = useState(loadIdx)
   const [done, setDone] = useState<Set<number>>(loadDone)
   const [glossaryOpen, setGlossaryOpen] = useState(false)
   const [focusMode, setFocusMode] = useState(false)
+  const narrowReader = useNarrowReaderLayout()
+  const [mobileTab, setMobileTab] = useState<MobileReaderTab>(initialMobileTab)
   const [quoteI] = useState(() => Math.floor(Math.random() * DAILY_QUOTES.length))
   const [deMap, setDeMap] = useState<LangMap | null>(null)
   const [deError, setDeError] = useState<string | null>(null)
@@ -121,6 +149,10 @@ export default function App() {
     jaTransScrollRef.current?.scrollTo({ top: 0 })
     jaGuideScrollRef.current?.scrollTo({ top: 0 })
   }, [section.n])
+
+  useEffect(() => {
+    if (focusMode && mobileTab === 'toc') setMobileTab('de')
+  }, [focusMode, mobileTab])
 
   useEffect(() => {
     // Mermaid は初期化を一度だけ行う
@@ -311,8 +343,42 @@ export default function App() {
         </aside>
       )}
 
-      <main className={`grid ${focusMode ? 'grid--focus' : ''}`}>
-        {!focusMode && (
+      {narrowReader && (
+        <div className="mobile-tabbar" role="tablist" aria-label="表示パネル">
+          {!focusMode && (
+            <button
+              type="button"
+              role="tab"
+              className={`mobile-tab ${mobileTab === 'toc' ? 'is-active' : ''}`}
+              aria-selected={mobileTab === 'toc'}
+              onClick={() => setMobileTab('toc')}
+            >
+              §目次
+            </button>
+          )}
+          <button
+            type="button"
+            role="tab"
+            className={`mobile-tab ${mobileTab === 'de' ? 'is-active' : ''}`}
+            aria-selected={mobileTab === 'de'}
+            onClick={() => setMobileTab('de')}
+          >
+            原文
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={`mobile-tab ${mobileTab === 'ja' ? 'is-active' : ''}`}
+            aria-selected={mobileTab === 'ja'}
+            onClick={() => setMobileTab('ja')}
+          >
+            訳・メモ
+          </button>
+        </div>
+      )}
+
+      <main className={`grid ${focusMode ? 'grid--focus' : ''} ${narrowReader ? 'grid--narrow-tabs' : ''}`}>
+        {!focusMode && (!narrowReader || mobileTab === 'toc') && (
           <nav className="toc" aria-label="段落目次">
             <div className="toc-head">段落（§）</div>
             <ul className="toc-list">
@@ -325,7 +391,10 @@ export default function App() {
                     <button
                       type="button"
                       className={`toc-item ${i === idx ? 'is-active' : ''} ${done.has(s.n) ? 'is-done' : ''}`}
-                      onClick={() => setIdx(i)}
+                      onClick={() => {
+                        setIdx(i)
+                        if (narrowReader) setMobileTab('de')
+                      }}
                     >
                       <span className="toc-n">§{s.n}</span>
                       <span className="toc-t">{getSectionTitleJa(s.n)}</span>
@@ -337,6 +406,7 @@ export default function App() {
           </nav>
         )}
 
+        {(!narrowReader || mobileTab === 'de') && (
         <section className="de-pane" aria-label="ドイツ語原文">
           <div className="pane-head de-head">
             <div>
@@ -357,7 +427,9 @@ export default function App() {
             {!deError && deText !== null && <article className="de-text">{deText}</article>}
           </div>
         </section>
+        )}
 
+        {(!narrowReader || mobileTab === 'ja') && (
         <section className="ja-pane" aria-label="日本語">
           <div className="pane-head ja-head">
             <div>
@@ -404,6 +476,7 @@ export default function App() {
             </p>
           </footer>
         </section>
+        )}
       </main>
 
       {glossaryOpen && (
