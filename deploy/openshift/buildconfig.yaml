@@ -1,0 +1,17 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: web
+  labels:
+    app: sein-unt-zeit
+spec:
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: web:latest
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5

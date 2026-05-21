@@ -8,6 +8,7 @@ import { getJaGuide, getSectionTitleJa } from './jaGuides'
 import { GLOSSARY } from './glossary'
 import { DAILY_QUOTES } from './quotes'
 import { SzCompletion } from './SzCompletion'
+import { Faq } from './Faq'
 
 import './App.css'
 
@@ -66,7 +67,7 @@ function initialMobileTab(): MobileReaderTab {
 }
 
 export default function App() {
-  const [siteView, setSiteView] = useState<'reader' | 'completion'>('reader')
+  const [siteView, setSiteView] = useState<'reader' | 'completion' | 'faq'>('reader')
   const [idx, setIdx] = useState(loadIdx)
   const [done, setDone] = useState<Set<number>>(loadDone)
   const [glossaryOpen, setGlossaryOpen] = useState(false)
@@ -310,6 +311,10 @@ export default function App() {
     return <SzCompletion onBack={() => setSiteView('reader')} />
   }
 
+  if (siteView === 'faq') {
+    return <Faq onBack={() => setSiteView('reader')} />
+  }
+
   return (
     <div className="app">
       <header className="top">
@@ -327,6 +332,9 @@ export default function App() {
           <div className="pill">
             読了 <strong>{done.size}</strong> / {SECTIONS.length}（{progress}%）
           </div>
+          <button type="button" className="ghost" onClick={() => setSiteView('faq')}>
+            FAQ
+          </button>
           <button type="button" className="ghost" onClick={() => setSiteView('completion')}>
             内的完結稿
           </button>

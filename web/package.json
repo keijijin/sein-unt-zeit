@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "extract:de": "python3 ../scripts/extract_de_sections.py",
     "translate:ja": "node ../scripts/translate-sections.mjs",
+    "export:ja-txt": "node ../scripts/export-ja-txt.mjs",
     "overview:gen": "node ../scripts/generate-overviews.mjs",
     "overview:sync": "node ../scripts/sync-overview-to-public.mjs",
     "completion:gen": "node ../scripts/generate-sz-completion.mjs",

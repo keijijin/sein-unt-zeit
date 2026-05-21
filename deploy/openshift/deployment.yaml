@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: sein-unt-zeit
+    deployment: web-app
+  annotations:
+    image.openshift.io/triggers: |-
+      [
+        {
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "web:latest"
+          },
+          "fieldPath": "spec.template.spec.containers[?(@.name==\"web\")].image",
+          "paused": false
+        }
+      ]
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: web-app
+  template:
+    metadata:
+      labels:
+        app: sein-unt-zeit
+        deployment: web-app
+      annotations:
+        alpha.image.policy.openshift.io/resolve-names: "true"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: web
+          image: web:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi

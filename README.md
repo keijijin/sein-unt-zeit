@@ -1,6 +1,9 @@
 # sein-unt-zeit（存在と時間 — じっくり読書室）
 
-ハイデガー『存在と時間』を、§ごとのドイツ語テキスト・日本語訳・解説・用語集とともに読むためのローカル Web アプリです。
+ハイデガー『存在と時間』を、§ごとのドイツ語テキスト・日本語訳・解説・用語集・FAQ とともに読む Web アプリです。
+
+- **GitHub**: https://github.com/keijijin/sein-unt-zeit
+- **公開サイト（OpenShift）**: https://web-app-sein-unt-zeit.apps.ocp.xflr6.sandbox2278.opentlc.com/
 
 ## 必要環境
 
@@ -24,6 +27,17 @@
 | `npm run translate:ja` | §ごと日本語訳の生成 |
 | `npm run overview:gen` / `overview:sync` | §解説の生成と `public` へのコピー |
 | `npm run completion:gen` / `completion:sync` | 内的完結稿の生成と同期 |
+| `npm run export:ja-txt` | 日本語訳を 10 節ずつ txt に分割出力 |
+
+## OpenShift へのデプロイ
+
+```bash
+oc project sein-unt-zeit
+oc apply -k deploy/openshift
+oc start-build web --from-dir=. --follow
+```
+
+詳細は [deploy/openshift/README.md](deploy/openshift/README.md) を参照してください。
 
 ## ライセンス
 

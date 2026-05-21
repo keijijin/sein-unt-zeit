@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: web-app
+  labels:
+    app: sein-unt-zeit
+spec:
+  to:
+    kind: Service
+    name: web-app
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
